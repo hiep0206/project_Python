@@ -1,0 +1,17 @@
+{% extends "home/base.html" %}
+
+{% block content %}
+    <h2 style="color: #2980b9;">Danh sách bài viết</h2>
+    <ul>
+        {% for post in Posts %}
+            <li>
+                <a href="{% url 'blog:post' post.id %}" style="text-decoration: none; color: #2c3e50; font-weight: bold; font-size: 1.2em;">
+                    {{ post.title }}
+                </a>
+                <p style="color: #666; font-size: 0.9em; margin-top: 5px;">
+                    Đăng ngày: {{ post.date|date:"d/m/Y" }}
+                </p>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

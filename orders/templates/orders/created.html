@@ -1,0 +1,13 @@
+{% extends "shop/base.html" %}
+{% block content %}
+<div class="container mt-5 text-center py-5">
+    <div class="card shadow p-5">
+        <h1 class="text-success fw-bold"><i class="fas fa-check-circle"></i> Đặt hàng thành công!</h1>
+        <p class="fs-4 mt-3">Cảm ơn Hiệp đã mua hàng. Mã đơn hàng của bạn là: <span class="badge bg-primary">#{{ order.id }}</span></p>
+        <p class="text-muted">Chúng mình sẽ liên hệ sớm nhất để giao MacBook cho bạn.</p>
+        <div class="mt-4">
+            <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary btn-lg">Quay lại cửa hàng</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

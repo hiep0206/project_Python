@@ -1,0 +1,89 @@
+{% extends "shop/base.html" %}
+
+{% block title %}Đăng nhập - HIEP SHOP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-5">
+        <div class="card shadow-lg border-0" style="border-radius: 20px; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px);">
+            <div class="card-body p-5">
+                
+                <div class="text-center mb-5">
+                    <i class="fab fa-apple fs-1 text-dark mb-2"></i>
+                    <h2 class="fw-bold text-dark mb-1">Đăng nhập</h2>
+                    <p class="text-muted small">Chào mừng bạn trở lại với Hiep Shop</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary small">{{ field.label }}</label>
+                            
+                            {{ field }}
+
+                            {% if field.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ field.errors|striptags }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger text-center shadow-sm py-2 mb-4" role="alert" style="border-radius: 10px; font-size: 0.9rem;">
+                            {{ form.non_field_errors|striptags }}
+                        </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3 mt-2 rounded-pill shadow-sm item-card">
+                        ĐĂNG NHẬP
+                    </button>
+                </form>
+
+                <hr class="my-4 border-secondary opacity-25">
+
+                <div class="text-center">
+                    <p class="mb-0 text-secondary small">
+                        Chưa có tài khoản? 
+                        <a href="{% url 'shop:register' %}" class="text-info fw-bold text-decoration-none hvr-underline-from-left">
+                            Đăng ký ngay
+                        </a>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Làm đẹp các ô input mặc định của Django */
+    input[type="text"], input[type="password"], input[type="email"] {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1.25rem;
+        font-size: 1rem;
+        font-weight: 400;
+        color: #212529;
+        background-color: #f8f9fa; /* Màu nền nhẹ cho ô input */
+        border: 1px solid #ced4da;
+        border-radius: 10px; /* Bo góc ô input */
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        background-color: #fff;
+    }
+
+    /* Hiệu ứng hover cho nút Đăng nhập */
+    .item-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .item-card:hover { 
+        transform: translateY(-3px); 
+        box-shadow: 0 8px 15px rgba(13, 110, 253, 0.3) !important; 
+    }
+</style>
+{% endblock %}

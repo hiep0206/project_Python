@@ -1,0 +1,56 @@
+{% extends "home/base.html" %} {% block content %}
+<div class="container mt-5" style="min-height: 500px;">
+    <h2 class="mb-4 text-primary"><i class="bi bi-box-seam"></i> ĐƠN HÀNG CỦA TÔI</h2>
+    <hr>
+
+    {% if orders %}
+        {% for order in orders %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between">
+                <span><strong>Mã đơn: #HS{{ order.id }}</strong></span>
+                <span>Ngày đặt: {{ order.created|date:"d/m/Y H:i" }}</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Giá</th>
+                            <th class="text-center">Số lượng</th>
+                            <th class="text-end">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.price }}đ</td>
+                            <td class="text-center">{{ item.quantity }}</td>
+                            <td class="text-end fw-bold">{{ item.get_cost }}đ</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+                <div>
+                    Trạng thái: 
+                    {% if order.paid %}
+                        <span class="badge bg-success">Đã thanh toán</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                    {% endif %}
+                </div>
+                <h4 class="mb-0">Tổng cộng: <span class="text-danger">{{ order.get_total_cost }}đ</span></h4>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info text-center py-5">
+            <h4>Hiệp chưa có đơn hàng nào cả!</h4>
+            <p>Hãy dạo một vòng quanh cửa hàng nhé.</p>
+            <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Mua sắm ngay</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

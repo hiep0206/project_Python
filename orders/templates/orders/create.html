@@ -1,0 +1,111 @@
+{% extends "shop/base.html" %} 
+{% load humanize %} 
+
+{% block content %}
+<div class="container mt-5 mb-5">
+  <h2 class="mb-4 text-primary fw-bold">
+    <i class="fas fa-shipping-fast"></i> Thông tin giao hàng
+  </h2>
+  
+  <div class="row g-4">
+    <div class="col-md-7">
+      <div class="card shadow-sm border-0 p-4" style="border-radius: 15px;">
+        <form method="post">
+          {% csrf_token %} 
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label fw-bold text-secondary">{{ field.label }}</label>
+            <div class="form-control-wrapper">{{ field }}</div>
+            {% if field.errors %}
+            <div class="text-danger small mt-1">{{ field.errors }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          
+          <button type="submit" class="btn btn-success btn-lg w-100 mt-4 shadow-sm fw-bold py-3 hover-effect">
+            <i class="fas fa-check-circle"></i> XÁC NHẬN ĐẶT HÀNG
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      <div class="card shadow-sm border-0 p-4 bg-white" style="border-radius: 15px; border-top: 5px solid #0d6efd !important;">
+        <h4 class="fw-bold mb-4"><i class="fas fa-shopping-bag text-primary"></i> Tóm tắt đơn hàng</h4>
+        
+        <div class="order-items-list">
+          {% for item in cart %}
+          <div class="d-flex justify-content-between align-items-start mb-3 pb-3 border-bottom">
+            <div>
+              <span class="fw-bold text-dark">{{ item.quantity }}x</span> 
+              <span class="ms-1">{{ item.product.name }}</span>
+              
+              {% if item.color %}
+              <div class="mt-1">
+                <span class="badge rounded-pill bg-light text-dark border shadow-sm small">
+                  <i class="fas fa-palette text-muted me-1"></i>Màu: {{ item.color }}
+                </span>
+              </div>
+              {% endif %}
+            </div>
+            <span class="fw-bold text-primary">{{ item.subtotal|intcomma }} VND</span>
+          </div>
+          {% endfor %}
+        </div>
+        
+        <div class="mt-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fs-5 fw-bold text-secondary">Tổng cộng:</span>
+            <span class="fs-4 fw-bold text-danger">{{ total_price|intcomma }} VND</span>
+          </div>
+        </div>
+
+        <div class="mt-4 p-3 bg-light rounded-3">
+          <small class="text-muted italic">
+            <i class="fas fa-info-circle"></i> Vui lòng kiểm tra kỹ thông tin và màu sắc sản phẩm trước khi xác nhận.
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Làm đẹp các ô input của Django form */
+  input, select, textarea {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  input:focus {
+    border-color: #0d6efd;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    background-color: #f8f9fa;
+  }
+
+  .hover-effect {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .hover-effect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3) !important;
+  }
+
+  .badge {
+    font-weight: 500;
+    padding: 6px 12px;
+  }
+</style>
+{% endblock %}

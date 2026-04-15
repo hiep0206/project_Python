@@ -1,0 +1,294 @@
+{% extends "shop/base.html" %}
+{% load humanize %} 
+{% block title %} 
+  {{product.name }} - HIEP SHOP 
+{% endblock %} 
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="row g-5">
+    <div class="col-md-6">
+      <div
+        class="product-image-container p-4 bg-white shadow-sm"
+        style="border-radius: 25px"
+      >
+        {% if product.image %}
+        <img
+          src="{{ product.image.url }}"
+          class="img-fluid rounded-3 zoom-effect"
+          alt="{{ product.name }}"
+        />
+        {% else %}
+        <img
+          src="https://via.placeholder.com/600x600?text=No+Image"
+          class="img-fluid rounded-3"
+          alt="No Image"
+        />
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+          <li class="breadcrumb-item">
+            <a
+              href="{% url 'shop:product_list' %}"
+              class="text-decoration-none text-muted"
+              >Cửa hàng</a
+            >
+          </li>
+          <li
+            class="breadcrumb-item active text-dark fw-bold"
+            aria-current="page"
+          >
+            {{ product.name }}
+          </li>
+        </ol>
+      </nav>
+
+      <h1 class="display-5 fw-bold text-dark mb-3">{{ product.name }}</h1>
+
+      <div class="price-tag mb-4">
+        <span class="fs-2 fw-bold text-danger" id="price-display">
+          {{ product.price|intcomma }}
+        </span>
+        <span class="fs-4 fw-bold text-danger ms-1">VND</span>
+      </div>
+
+      <div
+        class="description-box mb-4 p-3 bg-light"
+        style="border-left: 4px solid #198754; border-radius: 8px"
+      >
+        <h6 class="fw-bold text-secondary text-uppercase small">
+          Mô tả sản phẩm
+        </h6>
+        <div class="text-muted lh-lg">{{ product.description|linebreaks }}</div>
+      </div>
+
+      <hr class="my-4 opacity-25" />
+
+      <form
+        action="{% url 'shop:cart_add' product.id %}"
+        method="post"
+        id="add-to-cart-form"
+      >
+        {% csrf_token %}
+        <input
+          type="hidden"
+          name="variant_id"
+          id="selected-variant-id"
+          value=""
+        />
+        <input type="hidden" name="buy_now" id="buy-now-input" value="false" />
+
+        {% if variants %}
+        <div class="mb-4">
+          <label class="form-label fw-bold small text-secondary text-uppercase">
+            Chọn màu sắc:
+          </label>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            {% for v in variants %}
+            <div
+              class="color-variant-box"
+              onclick="selectVariant(this, '{{ v.id }}', '{{ v.price|intcomma }}', '{{ v.final_price|intcomma }}', '{{ v.is_sale }}', '{{ v.percent }}')"
+              title="{{ v.color }}"
+            >
+              {{ v.color }}
+              {% if v.is_sale %}
+                - giảm {{ v.percent }}%
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="row align-items-end g-3">
+          <div class="col-12 col-lg-4">
+            <label
+              class="form-label fw-bold small text-secondary text-uppercase"
+              >Số lượng:</label
+            >
+            <div
+              class="input-group input-group-lg border rounded-3 overflow-hidden shadow-sm"
+            >
+              <button
+                class="btn btn-light border-0 px-3"
+                type="button"
+                onclick="changeQty(-1)"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                name="quantity"
+                id="product-qty"
+                value="1"
+                min="1"
+                class="form-control text-center border-0 fw-bold"
+                readonly
+                style="background: #fff"
+              />
+              <button
+                class="btn btn-light border-0 px-3"
+                type="button"
+                onclick="changeQty(1)"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-8 d-flex gap-2">
+            <!-- ❤️ WISHLIST -->
+            <!-- <a
+              href="{% url 'shop:wishlist' product.id %}"
+              class="btn {% if is_favorite %}btn-danger{% else %}btn-outline-danger{% endif %} btn-lg fw-bold py-3 shadow rounded-3"
+            >
+              {% if is_favorite %} ❤️ ĐÃ THÍCH {% else %} 🤍 YÊU THÍCH {% endif %}
+            </a> -->
+
+            <!-- 🛒 GIỎ HÀNG -->
+            <button
+              type="button"
+              onclick="handleSubmit(false)"
+              class="btn btn-success btn-lg flex-grow-1 fw-bold py-3 shadow rounded-3 hover-up"
+            >
+              GIỎ HÀNG
+            </button>
+
+            <!-- ⚡ MUA NGAY -->
+            <button
+              type="button"
+              onclick="handleSubmit(true)"
+              class="btn btn-danger btn-lg flex-grow-1 fw-bold py-3 shadow rounded-3 hover-up"
+            >
+              MUA NGAY
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function selectVariant(element, variantId, price, finalPrice, isSale, percent) {
+    document
+      .querySelectorAll(".color-variant-box")
+      .forEach((box) => box.classList.remove("active"));
+    element.classList.add("active");
+    document.getElementById("selected-variant-id").value = variantId;
+
+    let displayPrice = finalPrice;
+    if (isSale === 'True' || isSale === true) {
+      displayPrice = finalPrice + ' (giảm ' + percent + '%)';
+    }
+    document.getElementById("price-display").innerText = displayPrice;
+  }
+
+  function changeQty(amt) {
+    const qtyInput = document.getElementById("product-qty");
+    let val = parseInt(qtyInput.value) + amt;
+    if (val < 1) val = 1;
+    qtyInput.value = val;
+  }
+
+  function handleSubmit(isBuyNow) {
+    const variantIdField = document.getElementById("selected-variant-id");
+    let variantId = variantIdField ? variantIdField.value : "";
+
+    const hasVariants =
+      document.querySelectorAll(".color-variant-box").length > 0;
+
+    if (hasVariants && !variantId) {
+      alert("Vui lòng chọn màu sắc trước khi tiếp tục!");
+      return;
+    }
+
+    const form = document.getElementById("add-to-cart-form");
+
+    if (isBuyNow) {
+      form.action = "{% url 'shop:cart_add' product.id %}?buy_now=true";
+      document.getElementById("buy-now-input").value = "true";
+    } else {
+      form.action = "{% url 'shop:cart_add' product.id %}";
+      document.getElementById("buy-now-input").value = "false";
+    }
+
+    form.submit();
+  }
+</script>
+
+<style>
+  .zoom-effect {
+    transition: transform 0.5s ease;
+  }
+  .product-image-container:hover .zoom-effect {
+    transform: scale(1.05);
+  }
+  .hover-up:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .color-variant-box {
+    padding: 12px 20px;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    cursor: pointer;
+    background: #fff;
+    transition: 0.2s;
+    font-weight: 500;
+  }
+  .color-variant-box.active {
+    border-color: #198754;
+    color: #198754;
+    background: #f0fff4;
+    font-weight: bold;
+  }
+</style>
+
+<hr class="my-5" />
+
+<h4 class="fw-bold">Đánh giá sản phẩm</h4>
+
+{% for r in reviews %}
+<div class="border rounded p-3 mb-2 bg-white">
+  <strong>{{ r.user.username }}</strong>
+
+  <div class="text-warning">
+    {% for i in "12345"|slice:":r.rating" %} ⭐ {% endfor %}
+  </div>
+
+  <p class="mb-0">{{ r.comment }}</p>
+  <small class="text-muted">{{ r.created }}</small>
+</div>
+{% empty %}
+<p>Chưa có đánh giá nào.</p>
+{% endfor %} 
+{% if user.is_authenticated %}
+<form method="post">
+  {% csrf_token %}
+
+  <label class="fw-bold">Đánh giá:</label>
+  <select name="rating" class="form-control mb-2" required>
+    <option value="5">⭐⭐⭐⭐⭐</option>
+    <option value="4">⭐⭐⭐⭐</option>
+    <option value="3">⭐⭐⭐</option>
+    <option value="2">⭐⭐</option>
+    <option value="1">⭐</option>
+  </select>
+
+  <label class="fw-bold">Nhận xét:</label>
+  <textarea name="comment" class="form-control mb-2" required></textarea>
+
+  <button class="btn btn-success">Gửi đánh giá</button>
+</form>
+
+{% else %}
+<p>
+  <a href="{% url 'shop:login' %}">Đăng nhập</a> để đánh giá
+</p>
+{% endif %}
+{% endblock %}

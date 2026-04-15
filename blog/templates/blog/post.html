@@ -1,0 +1,19 @@
+{% extends "home/base.html" %}
+
+{% block content %}
+    <article style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: #2c3e50; margin-top: 0;">{{ post.title }}</h2>
+        <p style="color: #888; font-style: italic;">
+            Ngày đăng: {{ post.date|date:"d/m/Y H:i" }}
+        </p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        
+        <div style="font-size: 1.1em; line-height: 1.8; color: #333;">
+            {{ post.body|linebreaks }}
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a href="{% url 'list' %}" style="color: #3498db; text-decoration: none;">← Quay lại danh sách bài viết</a>
+        </div>
+    </article>
+{% endblock %}

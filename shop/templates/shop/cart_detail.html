@@ -1,0 +1,140 @@
+{% extends "shop/base.html" %} 
+{% load humanize %} 
+
+{% block title %} Giỏ hàng - HIEP SHOP {% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+  <h2 class="fw-bold mb-4">
+    <i class="fas fa-shopping-cart me-2 text-success"></i>Giỏ hàng của bạn
+  </h2>
+
+  {% if cart_items %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th class="ps-4 py-3">Sản phẩm</th>
+                <th class="text-center">Số lượng</th>
+                <th class="text-end">Giá tiền</th>
+                <th class="text-center pe-4">Xóa</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart_items %}
+              <tr>
+                <td class="ps-4 py-3">
+                  <div class="d-flex align-items-center">
+                    <div class="me-3 bg-light rounded-3 p-1" style="width: 60px; height: 60px;">
+                        <img src="{{ item.product.image.url }}" class="img-fluid" style="max-height: 100%; object-fit: contain;">
+                    </div>
+                    <div>
+                      <div class="fw-bold text-dark">{{ item.product.name }}</div>
+                      <span class="badge bg-light text-success border border-success-subtle small">
+                        Màu: {{ item.color }}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="text-center">
+                  <div class="d-inline-flex align-items-center bg-light rounded-pill p-1 shadow-sm border">
+                    <a href="{% url 'shop:cart_add' item.product.id %}?action=minus&variant_id={{ item.variant_id }}" 
+                       class="btn btn-sm btn-white rounded-circle shadow-sm border-0 d-flex align-items-center justify-content-center"
+                       style="width: 28px; height: 28px;">
+                      <i class="fas fa-minus text-muted small"></i>
+                    </a>
+
+                    <span class="mx-3 fw-bold" style="min-width: 20px;">{{ item.quantity }}</span>
+
+                    <a href="{% url 'shop:cart_add' item.product.id %}?action=plus&variant_id={{ item.variant_id }}" 
+                       class="btn btn-sm btn-white rounded-circle shadow-sm border-0 d-flex align-items-center justify-content-center"
+                       style="width: 28px; height: 28px;">
+                      <i class="fas fa-plus text-success small"></i>
+                    </a>
+                  </div>
+                </td>
+
+                <td class="text-end fw-bold text-danger pe-3">
+                  {{ item.subtotal|intcomma }} VND
+                </td>
+
+                <td class="text-center pe-4">
+                  <a href="{% url 'shop:cart_remove' item.product.id item.variant_id|default:'0' %}" class="text-muted hover-delete">
+                    <i class="fas fa-trash-alt"></i>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <a href="{% url 'shop:product_list' %}" class="btn btn-link text-decoration-none text-muted p-0">
+          <i class="fas fa-arrow-left me-2"></i>Tiếp tục mua sắm
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 20px;">
+        <h5 class="fw-bold mb-4 border-bottom pb-2 text-uppercase small letter-spacing-1">Tóm tắt đơn hàng</h5>
+        </form>
+        <!-- 🎟 VOUCHER -->
+        <form method="post" action="{% url 'shop:apply_voucher' %}" class="mb-3">
+          {% csrf_token %}
+          <div class="input-group">
+            <input type="text" name="code" class="form-control" placeholder="Nhập mã giảm giá">
+            <button class="btn btn-outline-success">Áp dụng</button>
+          </div>
+        </form>
+        <div class="d-flex justify-content-between mb-3 text-muted">
+          <span>Tạm tính:</span>
+          <span class="fw-bold text-dark">{{ final_price|intcomma }} VND</span>
+        </div>
+        <div class="d-flex justify-content-between mb-3 text-muted">
+          <span>Phí vận chuyển:</span>
+          <span class="text-success fw-bold">Miễn phí</span>
+        </div>
+        {% if discount %}
+        <div class="d-flex justify-content-between mb-3 text-danger">
+          <span>Giảm giá:</span>
+          <span>- {{ discount|intcomma }} VND</span>
+        </div>
+        {% endif %}
+        <hr class="opacity-10" />
+        <div class="d-flex justify-content-between mb-4">
+          <span class="fs-5 fw-bold">Tổng cộng:</span>
+          <span class="fs-4 fw-bold text-danger">
+            {{ final_price|intcomma }} VND
+          </span>
+        </div>
+        <a href="{% url 'orders:checkout_from_cart' %}" class="btn btn-success w-100 py-3 fw-bold rounded-pill shadow-sm hover-up">
+          TIẾN HÀNH THANH TOÁN
+        </a>
+          TIẾN HÀNH THANH TOÁN
+        </a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-5 shadow-sm bg-white rounded-4 mt-4">
+    <i class="fas fa-shopping-basket text-light mb-4" style="font-size: 100px;"></i>
+    <h4 class="text-dark fw-bold">Giỏ hàng của bạn đang trống</h4>
+    <a href="{% url 'shop:product_list' %}" class="btn btn-success px-5 py-3 fw-bold rounded-pill shadow mt-3">ĐI ĐẾN CỬA HÀNG NGAY</a>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  .btn-white { background-color: #fff; }
+  .btn-white:hover { background-color: #f8f9fa; }
+  .hover-delete:hover { color: #dc3545 !important; transform: scale(1.2); }
+  .hover-up:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(25, 135, 84, 0.2) !important; }
+</style>
+{% endblock %}

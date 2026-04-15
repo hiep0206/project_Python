@@ -1,0 +1,147 @@
+/* Trang trí tổng thể cho Hiep Shop */
+body {
+    background-color: #f4f7f6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Đảm bảo nội dung luôn đẩy Footer xuống dưới cùng */
+.container.mt-4 {
+    flex: 1;
+}
+
+/* TRANG TRÍ FOOTER MÀU ĐEN (Theo yêu cầu của Hiệp) */
+.custom-footer {
+    background-color: #0b0b0b !important; /* Màu đen sâu */
+    color: #ffffff !important;
+    padding: 60px 0 20px 0;
+    margin-top: 50px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 0 20px;
+}
+
+.footer-column {
+    flex: 1;
+    min-width: 250px;
+    margin-bottom: 30px;
+}
+
+.footer-column h3 {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.footer-column p, 
+.footer-column li, 
+.footer-column a {
+    color: #b0b0b0 !important; /* Màu chữ xám mờ cho sang */
+    text-decoration: none;
+    list-style: none;
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+
+.footer-column ul {
+    padding: 0;
+}
+
+.footer-column a:hover {
+    color: #00d2ff !important; /* Màu xanh khi di chuột vào */
+    transition: 0.3s;
+}
+
+.footer-bottom {
+    text-align: center;
+    border-top: 1px solid #222;
+    margin-top: 40px;
+    padding-top: 20px;
+}
+
+.footer-bottom p {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* Trang trí danh mục bên trái */
+.list-group-item {
+    border: none;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+    border-radius: 8px !important;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.list-group-item.active {
+    background-color: #00d2ff !important;
+    border-color: #00d2ff !important;
+    box-shadow: 0 4px 12px rgba(0, 210, 255, 0.3);
+}
+
+.list-group-item:hover:not(.active) {
+    background-color: #e9ecef;
+    color: #00d2ff;
+    padding-left: 25px;
+}
+
+/* --- TRANG TRÍ Ô CHỌN MÀU SẮC (DÀNH CHO DETAIL.HTML) --- */
+.color-variant-box {
+    padding: 10px 25px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    background-color: #fff;
+    transition: all 0.2s ease;
+    min-width: 90px;
+    text-align: center;
+    user-select: none;
+    position: relative;
+    font-weight: 500;
+}
+
+/* Khi di chuột qua ô màu */
+.color-variant-box:hover {
+    border-color: #00d2ff; /* Màu xanh Hiep Shop */
+    color: #00d2ff;
+}
+
+/* Khi ô màu được CHỌN (Active) */
+.color-variant-box.active {
+    border-color: #ee4d2d; /* Màu cam nổi bật khi chọn */
+    color: #ee4d2d;
+    background-color: #fff;
+    font-weight: bold;
+}
+
+/* Dấu tích nhỏ ở góc ô màu khi được chọn */
+.color-variant-box.active::after {
+    content: "✓";
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    background-color: #ee4d2d;
+    color: white;
+    font-size: 9px;
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(100% 0, 0% 100%, 100% 100%);
+    border-radius: 0 0 6px 0;
+}
+

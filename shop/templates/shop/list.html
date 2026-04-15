@@ -1,0 +1,306 @@
+{% extends "shop/base.html" %}
+{% load humanize %}
+
+{% block content %}
+<style>
+    /* Custom Styles cho giao diện chuyên nghiệp */
+    :root {
+        --primary-color: #198754;
+        --sale-color: #ee4d2d;
+        --bg-light: #f8f9fa;
+    }
+
+    .featured-banner {
+        background: linear-gradient(135deg, #fff5f2 0%, #ffe3d5 100%) !important;
+        border: none !important;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .featured-banner:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+    }
+    .banner-image img {
+        filter: drop-shadow(10px 10px 20px rgba(0,0,0,0.1));
+        transition: transform 0.5s ease;
+    }
+    .featured-banner:hover .banner-image img {
+        transform: scale(1.05);
+    }
+
+    .product-card {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: 1px solid #eee !important;
+    }
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+    }
+
+    .badge-sale {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        color: white;
+        font-weight: bold;
+        padding: 5px 12px;
+        border-radius: 50px;
+        z-index: 10;
+        font-size: 0.75rem;
+        box-shadow: 0 4px 10px rgba(238, 77, 45, 0.3);
+    }
+
+    .btn-add-cart {
+        border-radius: 50px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: all 0.3s;
+    }
+    .btn-add-cart:hover {
+        background-color: #146c43 !important;
+        transform: scale(1.02);
+    }
+
+    /* Modal Styling */
+    .variant-label {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #f0f0f0;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+    .variant-input:checked + .variant-label {
+        border-color: var(--primary-color);
+        background: #eefdf3;
+        color: var(--primary-color);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.15);
+    }
+</style>
+
+<div class="container mt-4">
+
+    {% if featured_product %}
+    <div class="featured-banner mb-5 p-5 rounded-4 shadow-sm d-flex align-items-center">
+        <div class="banner-image me-5 d-none d-md-block flex-shrink-0">
+            <img src="{{ featured_product.image.url }}" alt="{{ featured_product.name }}" class="rounded shadow-sm" style="max-height: 250px; max-width: 350px; object-fit: contain;">
+        </div>
+
+        <div class="banner-info">
+            <div class="badge bg-danger mb-3 px-3 py-2 text-uppercase fw-bold shadow-sm" style="border-radius: 50px;">
+                <i class="bi bi-fire me-1"></i> Deal hot hôm nay
+            </div>
+            <h1 class="fw-bold display-6 mb-3">{{ featured_product.name }}</h1>
+            
+            <div class="price-block mb-4">
+                {% if featured_product.sale_info.is_sale %}
+                    <p class="text-muted mb-1 small fw-bold text-uppercase">Giá khuyến mãi:</p>
+                    <div class="d-flex align-items-center">
+                        <span class="text-danger fw-bold fs-1">{{ featured_product.sale_info.final_price|intcomma }}₫</span>
+                        <del class="text-muted ms-3 fs-5">{{ featured_product.price|intcomma }}₫</del>
+                        <span class="ms-3 badge rounded-pill bg-danger shadow-sm">-{{ featured_product.sale_info.percent }}%</span>
+                    </div>
+                {% else %}
+                    <p class="fs-1 fw-bold text-dark">{{ featured_product.price|intcomma }}₫</p>
+                {% endif %}
+            </div>
+            
+            <a href="{% url 'shop:product_detail' featured_product.id featured_product.slug %}" class="btn btn-dark btn-lg px-5 py-3 shadow fw-bold" style="border-radius: 12px;">
+                SĂN DEAL NGAY <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card border-0 shadow-sm p-4 mb-5" style="border-radius: 20px; background-color: #fff;">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label fw-bold text-muted small text-uppercase">Bạn tìm gì hôm nay?</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Tên điện thoại, laptop..." value="{{ query }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-muted small text-uppercase">Danh mục</label>
+                <select name="category_select" class="form-select border-1">
+                    <option value="">Tất cả danh mục</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.slug }}" {% if category_select == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm" style="border-radius: 10px;">
+                    LỌC SẢN PHẨM
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% with sale_products=products|dictsort:"-sale_info.is_sale" %}
+    {% if sale_products %}
+    <div class="d-flex align-items-center mb-4">
+        <h3 class="fw-bold mb-0">🔥 Giảm giá sốc</h3>
+        <hr class="flex-grow-1 ms-4 opacity-10">
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
+        {% for product in sale_products %}
+            {% if product.sale_info.is_sale %}
+            <div class="col position-relative">
+                <span class="badge-sale">-{{ product.sale_info.percent }}%</span>
+                <div class="card h-100 product-card shadow-sm overflow-hidden border-0">
+                    <a href="{% url 'shop:product_detail' product.id product.slug %}">
+                        <div class="p-4" style="height: 220px; display: flex; align-items: center; justify-content: center; background: #fff;">
+                            <img src="{{ product.image.url }}" class="img-fluid" style="max-height: 100%; object-fit: contain"/>
+                        </div>
+                    </a>
+                    <div class="card-body text-center d-flex flex-column p-4">
+                        <h6 class="fw-bold text-dark mb-2">{{ product.name }}</h6>
+                        <div class="mb-3">
+                            <span class="text-muted text-decoration-line-through small d-block">{{ product.price|intcomma }}₫</span>
+                            <span class="text-danger fw-bold fs-5">{{ product.sale_info.final_price|intcomma }}₫</span>
+                        </div>
+                        <div class="d-grid mt-auto">
+                            {% if product.variants.exists %}
+                                <button class="btn btn-success btn-add-cart py-2" onclick="openPremiumModal('{{ product.id }}', '{{ product.name }}')">
+                                    THÊM VÀO GIỎ
+                                </button>
+                            {% else %}
+                                <form action="{% url 'shop:cart_add' product.id %}" method="post" class="m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="variant_id" value="0" />
+                                    <button type="submit" class="btn btn-success btn-add-cart w-100 py-2">
+                                        THÊM VÀO GIỎ
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="d-flex align-items-center mb-4">
+        <h3 class="fw-bold mb-0">✨ Tất cả sản phẩm</h3>
+        <hr class="flex-grow-1 ms-4 opacity-10">
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for product in products %}
+        <div class="col position-relative">
+            {% if product.sale_info.is_sale %}
+                <span class="badge-sale">-{{ product.sale_info.percent }}%</span>
+            {% endif %}
+            <div class="card h-100 product-card shadow-sm border-0">
+                <a href="{% url 'shop:product_detail' product.id product.slug %}">
+                    <div class="p-4" style="height: 220px; display: flex; align-items: center; justify-content: center;">
+                        <img src="{{ product.image.url }}" class="img-fluid" style="max-height: 100%; object-fit: contain"/>
+                    </div>
+                </a>
+                <div class="card-body text-center d-flex flex-column p-4">
+                    <h6 class="fw-bold text-dark mb-2">{{ product.name }}</h6>
+                    <div class="mb-3">
+                        {% if product.sale_info.is_sale %}
+                            <span class="text-muted text-decoration-line-through small d-block">{{ product.price|intcomma }}₫</span>
+                            <span class="text-danger fw-bold fs-5">{{ product.sale_info.final_price|intcomma }}₫</span>
+                        {% else %}
+                            <span class="text-success fw-bold fs-5">{{ product.price|intcomma }}₫</span>
+                        {% endif %}
+                    </div>
+                    <div class="d-grid mt-auto">
+                        {% if product.variants.exists %}
+                            <button class="btn btn-success btn-add-cart py-2" onclick="openPremiumModal('{{ product.id }}', '{{ product.name }}')">
+                                THÊM VÀO GIỎ
+                            </button>
+                        {% else %}
+                            <form action="{% url 'shop:cart_add' product.id %}" method="post" class="m-0">
+                                {% csrf_token %}
+                                <input type="hidden" name="variant_id" value="0" />
+                                <button type="submit" class="btn btn-success btn-add-cart w-100 py-2">
+                                    THÊM VÀO GIỎ
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="premiumModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 450px">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 25px">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 pt-0 text-center">
+                <h3 class="fw-bold mb-1" id="mName">Sản phẩm</h3>
+                <p class="text-muted mb-4">Chọn màu sắc yêu thích của bạn</p>
+                
+                <div class="mb-4 py-3 px-2 bg-light rounded-4">
+                    <span class="text-danger fw-bold h2 mb-0" id="mPrice">0</span>
+                    <span class="text-danger fw-bold h4">₫</span>
+                </div>
+
+                <form id="mForm" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="quantity" value="1" />
+                    <div class="text-start mb-4">
+                        <label class="small fw-bold text-muted mb-3 text-uppercase ms-1">Màu sắc khả dụng:</label>
+                        <div id="mOptions" class="row g-3"></div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-3 fw-bold rounded-pill shadow-sm">
+                        XÁC NHẬN THÊM GIỎ HÀNG
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function formatMoney(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+
+function openPremiumModal(pid, name){
+    document.getElementById("mName").innerText = name;
+    document.getElementById("mForm").action = "/cart/add/"+pid+"/";
+    
+    fetch("/api/variants/?pid="+pid)
+    .then(res => res.json())
+    .then(data => {
+        let html = "";
+        data.variants.forEach((v, i) => {
+            html += `
+            <div class="col-6">
+                <input type="radio" class="variant-input" name="variant_id" 
+                       id="v${v.id}" value="${v.id}" ${i==0 ? "checked" : ""}
+                       onchange="updatePrice('${v.sale_price || v.price}')">
+                <label class="variant-label text-center" for="v${v.id}">
+                    <div class="small text-muted mb-1">Màu</div>
+                    <div class="fw-bold">${v.color}</div>
+                </label>
+            </div>`;
+        });
+        document.getElementById("mOptions").innerHTML = html;
+        if(data.variants.length > 0) updatePrice(data.variants[0].sale_price || data.variants[0].price);
+        new bootstrap.Modal(document.getElementById("premiumModal")).show();
+    });
+}
+
+function updatePrice(p){ 
+    document.getElementById("mPrice").innerText = formatMoney(p); 
+}
+</script>
+
+{% endblock %}
